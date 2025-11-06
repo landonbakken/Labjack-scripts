@@ -57,6 +57,7 @@ local sinWave = 0
 -- AIN port config
 local ainChannelCorrection = {0, 0, 0, 0, 0}--, 0, 0, 0, 0} --values that zero each channel
 local nominalResistances = {120, 350, 120, 120, 120}  -- 120 or 350 ohms
+local channelRange = {.01, .01, .01, .01, .01}
 local ainChannels = {0, 2, 4, 6, 8}--, 4, 6, 8, 10} -- the channels that are read (only even because the odds are the negative channels)
 local ainChannelNum = table.getn(ainChannels)
 
@@ -68,7 +69,7 @@ end
 local givenVoltageChannel = 10
 local givenVoltageChannelAddress = givenVoltageChannel * 2 --pre calculation
 local ainVoltageRange = 0.01 -- +/- 1V input range
-local ainResolution = 8 -- 1 is fastest, 12 is most detail (but slowest)
+local ainResolution = 12 -- 1 is fastest, 12 is most detail (but slowest)
 local ainSettlingTime = 0 -- default settling time
 
 -- functions
@@ -99,7 +100,7 @@ end
 
 --loop through strain gauge ain channels
 for i=1,ainChannelNum do
-  configureChannel(ainChannels[i], ainVoltageRange, ainResolution, ainSettlingTime, true)
+  configureChannel(ainChannels[i], channelRange[i], ainResolution, ainSettlingTime, true)
   configureChannel(ainChannels[i] + 1, 10, ainResolution, ainSettlingTime, false) --negative channel
 end
 configureChannel(givenVoltageChannel, 10, ainResolution, ainSettlingTime, false) --input voltage muesure ain channel
@@ -191,14 +192,14 @@ while true do --loop forever
       voltageDiff = voltageDiff + ainChannelCorrection[i] -- correct voltage input
       
       --get nominal resistance
-      --nominalResistance = nominalResistances[i]
+      nominalResistance = nominalResistances[i]
       
       -- math :(
-      --sgResistance = nominalResistance/(1/(voltageDiff/givenVoltage + 0.5)-1)
-      --sgResistanceDiff = sgResistance - nominalResistance
-      --stress = sgResistanceDiff/sgResistance*elasticModulus/gaugeFactor
+      sgResistance = nominalResistance/(1/(voltageDiff/givenVoltage + 0.5)-1)
+      sgResistanceDiff = sgResistance - nominalResistance
+      stress = -sgResistanceDiff/sgResistance*elasticModulus/gaugeFactor
       
-      writeString = writeString .. ", " .. voltageDiff -- make negative if stress
+      writeString = writeString .. ", " .. stress
     end
     file:write(writeString, "\n") -- Write data to file
     print(writeString) --print to console

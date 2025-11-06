@@ -1,6 +1,6 @@
 local elasticModulus = 29000000 
 local gaugeFactor = 2.12 
-local sinWaveHz = 2
+local sinWaveHz = .5
 local timeMultSin = 2 * 3.1415 * sinWaveHz 
 MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 if(bit.band(MB.R(60010, 1), 8) ~= 8) then
@@ -26,7 +26,8 @@ local startTime = 0
 local currentTime = 0
 local sinWave = 0
 local ainChannelCorrection = {0, 0, 0, 0, 0}
-local nominalResistances = {120, 350, 120, 120, 120}  
+local nominalResistances = {120, 120, 120, 120, 120}  
+local channelRange = {.01, .01, .01, .01, .01}
 local ainChannels = {0, 2, 4, 6, 8}
 local ainChannelNum = table.getn(ainChannels)
 local ainChannelAddresses = {} 
@@ -36,7 +37,7 @@ end
 local givenVoltageChannel = 10
 local givenVoltageChannelAddress = givenVoltageChannel * 2 
 local ainVoltageRange = 0.01 
-local ainResolution = 8 
+local ainResolution = 7
 local ainSettlingTime = 0 
 local function configureChannel(channel, range, resolution, settling, differential)
   local channel_int = string.format("%d", channel)
@@ -57,7 +58,7 @@ local function stopProgram(message)
   mbWrite(6000, 1, 0); 
 end
 for i=1,ainChannelNum do
-  configureChannel(ainChannels[i], ainVoltageRange, ainResolution, ainSettlingTime, true)
+  configureChannel(ainChannels[i], channelRange[i], ainResolution, ainSettlingTime, true)
   configureChannel(ainChannels[i] + 1, 10, ainResolution, ainSettlingTime, false) 
 end
 configureChannel(givenVoltageChannel, 10, ainResolution, ainSettlingTime, false) 

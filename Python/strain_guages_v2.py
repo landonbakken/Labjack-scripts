@@ -52,7 +52,7 @@ print("Opened a LabJack with Device type: %i, Connection type: %i,\n"
 deviceType = info[0]
 
 # Stream Configuration
-streamedChannels = strainGaugeChannels = [0]
+streamedChannels = strainGaugeChannels = [0, 12]
 inputVoltageChannel = 10
 streamedChannels.append(inputVoltageChannel)
 numAddresses = len(streamedChannels)
